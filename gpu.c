@@ -58,8 +58,7 @@ void gpu_triangle(uint8_t *frame, float a, float b, float c, float d, float e, f
     }
 }
 
-void *gpu_frame() {
-    uint8_t *frame = malloc(640 * 480 * 4);
+void gpu_frame(uint8_t *frame, int i) {
     for (int y = 0; y < 480; y++) {
         for (int x = 0; x < 640; x++) {
             uint8_t *pixel = &frame[y * 640 * 4 + x * 4];
@@ -69,6 +68,5 @@ void *gpu_frame() {
             pixel[3] = 0xFF;
         }
     }
-    gpu_triangle(frame, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.0f);
-    return frame;
+    gpu_triangle(frame, -1, -1, 0, 1, 1, -1);
 }
