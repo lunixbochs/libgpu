@@ -79,6 +79,14 @@ mat4 *mat4_frustum(mat4 *m, float left, float right,
     return m;
 }
 
+mat4 *mat4_perspective(mat4 *m, float fov, float aspect, float znear, float zfar) {
+    simd4x4f perspective, out;
+    simd4x4f_perspective(&perspective, fov, aspect, znear, zfar);
+    simd4x4f_matrix_mul(m, &perspective, &out);
+    *m = out;
+    return m;
+}
+
 void mat4_mul_vec2(mat4 *m, float out[2], const float in[2]) {
     simd4f tmp, vert = simd4f_create(in[0], in[1], 0.0f, 1.0f);
     simd4x4f_matrix_vector_mul(m, &vert, &tmp);
