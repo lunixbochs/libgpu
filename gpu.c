@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +16,13 @@
 #ifndef ABS
 #define ABS(a) ((a) < 0 ? -(a) : (a))
 #endif
+
+bool is_backward(float *tri) {
+    float *a = &tri[0];
+    float *b = &tri[3];
+    float *c = &tri[6];
+    return ((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) <= 0;
+}
 
 void gpu_pixel(uint8_t *frame, int x, int y) {
     if (x < 0 || x >= 640 || y < 0 || y >= 480) return;
@@ -76,6 +84,9 @@ void gpu_triangle(uint8_t *frame, float *verts, float rotate) {
         mat4_mul_vec3(model, v, v);
         mat4_mul_vec3(view, v, v);
         mat4_mul_vec3(viewport, v, v);
+    }
+    if (is_backward(verts)) {
+        return;
     }
     for (int i = 0; i < 3; i++) {
         int next = (i + 1) % 3;
