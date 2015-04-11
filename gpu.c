@@ -67,13 +67,14 @@ void gpu_line(uint8_t *frame, float a[2], float b[2]) {
     }
 }
 
-void gpu_triangle(uint8_t *frame, float *verts, float rotate) {
+void gpu_triangle(uint8_t *frame, float *verts, float rotate, float xt) {
+    float tmp[9] = {0};
     mat4 *viewport = mat4_new();
     mat4_translate(viewport, (640 - 0.5f) / 2.0f, (480 - 0.5f) / 2.0f, -1.0f);
     mat4_scale(viewport, (640 - 0.5f) / 2.0f, -(480 - 0.5f) / 2.0f, 1.0f);
 
     mat4 *model = mat4_new();
-    mat4_translate(model, 3.0f, 0, 10.0f);
+    mat4_translate(model, xt + 3.0f, 0, 10.0f);
     mat4_rotate(model, rotate, 1.0f, 0, 0);
 
     mat4 *view = mat4_new();
@@ -81,16 +82,17 @@ void gpu_triangle(uint8_t *frame, float *verts, float rotate) {
 
     for (int i = 0; i < 3; i++) {
         float *v = &verts[i * 3];
-        mat4_mul_vec3(model, v, v);
-        mat4_mul_vec3(view, v, v);
-        mat4_mul_vec3(viewport, v, v);
+        float *vo = &tmp[i * 3];
+        mat4_mul_vec3(model, vo, v);
+        mat4_mul_vec3(view, vo, vo);
+        mat4_mul_vec3(viewport, vo, vo);
     }
-    if (is_backward(verts)) {
+    if (is_backward(tmp)) {
         return;
     }
     for (int i = 0; i < 3; i++) {
         int next = (i + 1) % 3;
-        gpu_line(frame, &verts[i * 3], &verts[next * 3]);
+        gpu_line(frame, &tmp[i * 3], &tmp[next * 3]);
     }
 }
 
@@ -104,81 +106,15 @@ void gpu_frame(uint8_t *frame, int counter) {
             pixel[3] = 0xFF;
         }
     }
-    float tri3d[] = {
-        // front
-        0, 1, 0,
-        -1, -1, 1,
-        1, -1, 1,
-
-        // right
-        0, 1, 0,
-        1, -1, 1,
-        1, -1, -1,
-
-        // back
-        0, 1, 0,
-        1, -1, -1,
-        -1, -1, -1,
-
-        // left
-        0, 1, 0,
-        -1, -1, -1,
-        -1, -1, 1,
-    };
-
-    float cube3d[] = {
-        1, 1, -1,
-        -1, 1, -1,
-        1, 1, 1,
-
-        -1, 1, -1,
-        -1, 1, 1,
-        1, 1, 1,
-
-        1, -1 ,1,
-        -1 ,-1, 1,
-        1, -1, -1,
-
-        -1, -1, 1,
-        -1, -1, -1,
-        1, -1, -1,
-
-        1, 1, 1,
-        -1, 1, 1,
-        1, -1, 1,
-
-        -1, 1, 1,
-        -1, -1, 1,
-        1, -1, 1,
-
-        1, -1, -1,
-        -1, -1, -1,
-        1, 1, -1,
-
-        -1, -1, -1,
-        -1, 1, -1,
-        1, 1, -1,
-
-        -1, 1, 1,
-        -1, 1, -1,
-        -1, -1, 1,
-
-        -1, 1, -1,
-        -1, -1, -1,
-        -1, -1, 1,
-
-        1, 1, -1,
-        1, 1, 1,
-        1, -1, -1,
-
-        1, 1, 1,
-        1, -1, 1,
-        1, -1, -1,
-    };
     for (int i = 0; i < 4; i++) {
 //        gpu_triangle(frame, &tri3d[i * 9], counter / 2);
     }
+#include "shapes.h"
     for (int i = 0; i < 12; i++) {
-        gpu_triangle(frame, &cube3d[i * 9], counter / 2);
+        gpu_triangle(frame, &cube3d[i * 9], counter / 2, 3);
+        gpu_triangle(frame, &cube3d[i * 9], counter / 3, 0);
+        gpu_triangle(frame, &cube3d[i * 9], counter / 4, -3);
+        gpu_triangle(frame, &cube3d[i * 9], counter / 5, -6);
+        gpu_triangle(frame, &cube3d[i * 9], counter / 6, -9);
     }
 }
