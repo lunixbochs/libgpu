@@ -12,6 +12,7 @@ int main() {
     SDL_Surface *tmp = SDL_CreateRGBSurface(0, 640, 480, 32, 0xFF, 0xFF00, 0xFF0000, 0xFF000000);
     int i = 0;
     bool done = false;
+    bool click = false;
     SDL_Event event;
     while (!done) {
         while (SDL_PollEvent(&event)) {
@@ -19,10 +20,21 @@ int main() {
                 case SDL_QUIT:
                     done = true;
                     break;
+                case SDL_MOUSEBUTTONDOWN:
+                    click = true;
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    click = false;
+                    break;
+                case SDL_MOUSEMOTION:
+                    if (click) {
+                        i += (event.motion.xrel + event.motion.yrel) * 10;
+                    }
+                    break;
             }
         }
         SDL_LockSurface(tmp);
-        gpu_frame(tmp->pixels, i++);
+        gpu_frame(tmp->pixels, i);
         SDL_UnlockSurface(tmp);
         SDL_BlitSurface(tmp, NULL, screen, NULL);
         SDL_UpdateWindowSurface(window);
