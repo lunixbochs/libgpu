@@ -21,6 +21,8 @@
 #define FLOOR(a) (a - (a - (int)a))
 #endif
 
+#define SWAP(a, b) do { tmp = (a); (a) = (b); (b) = (tmp); } while (0);
+
 bool is_backward(float *tri) {
     float *a = &tri[0];
     float *b = &tri[3];
@@ -37,24 +39,19 @@ void gpu_pixel(uint8_t *frame, int x, int y) {
     pixel[3] = 0xFF;
 }
 
-static void swapf(float *a, float *b) {
-    float tmp = *a;
-    *a = *b;
-    *b = tmp;
-}
-
 void gpu_line(uint8_t *frame, float a[2], float b[2]) {
     float x1, y1, x2, y2;
+    float tmp;
     x1 = a[0], y1 = a[1];
     x2 = b[0], y2 = b[1];
     bool steep = ABS(b[1] - a[1]) > ABS(b[0] - a[0]);
     if (steep) {
-        swapf(&x1, &y1);
-        swapf(&x2, &y2);
+        SWAP(x1, y1);
+        SWAP(x2, y2);
     }
     if (x1 > x2) {
-        swapf(&x1, &x2);
-        swapf(&y1, &y2);
+        SWAP(x1, x2);
+        SWAP(y1, y2);
     }
     if (y1 == y2) {
         for (int x = x1; x < x2; x++) {
@@ -77,40 +74,34 @@ void gpu_line(uint8_t *frame, float a[2], float b[2]) {
     }
 }
 
-static void swapfv(float **a, float **b) {
-    float *tmp;
-    tmp = *a;
-    *a = *b;
-    *b = tmp;
-}
-
 void gpu_2d_triangle_fill(uint8_t *frame, float *t) {
     float *v1 = &t[0], *v2 = &t[3], *v3 = &t[6];
     float *tmp;
     if (v2[1] < v1[1]) {
-        swapfv(&v2, &v1);
+        SWAP(v2, v1);
     }
     if (v3[1] < v1[1]) {
-        swapfv(&v3, &v2);
-        swapfv(&v2, &v1);
+        SWAP(v3, v2);
+        SWAP(v2, v1);
     } else if (v3[1] < v2[1]) {
-        swapfv(&v3, &v2);
+        SWAP(v3, v2);
     }
     float *top = v3, *lmid = v2, *bot = v1;
-    float *rmid;
+    float *rmid, rmidb[3];
     if (top[1] == lmid[1]) {
         rmid = top;
     } else {
         float rslope = (top[0] - bot[0]) / (top[1] - bot[1]);
-        float tmp[3] = {
+        float tmid[3] = {
             (lmid[1] - bot[1]) * rslope + bot[0],
             lmid[1],
             0, // tbd
         };
-        rmid = tmp;
+        memcpy(rmidb, tmid, sizeof(rmid));
+        rmid = rmidb;
     }
     if (rmid[0] < lmid[0]) {
-        swapfv(&rmid, &lmid);
+        SWAP(rmid, lmid);
     }
     /*
     printf("top: %.2f, %.2f, %.2f\n", top[0], top[1], top[2]);
@@ -178,22 +169,24 @@ void gpu_triangle(uint8_t *frame, float *verts, float rotate, float offset, bool
     mat4 *view = mat4_new();
     mat4_perspective(view, 45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
 
+    float tmp[9];
     for (int i = 0; i < 3; i++) {
         float *v = &verts[i * 3];
-        mat4_mul_vec3(model, v, v);
-        mat4_mul_vec3(view, v, v);
-        mat4_mul_vec3(viewport, v, v);
+        float *t = &tmp[i * 3];
+        mat4_mul_vec3(model, t, v);
+        mat4_mul_vec3(view, t, t);
+        mat4_mul_vec3(viewport, t, t);
     }
-    if (is_backward(verts)) {
+    if (is_backward(tmp)) {
         return;
     }
     if (!fill) {
         for (int i = 0; i < 3; i++) {
             int next = (i + 1) % 3;
-            gpu_line(frame, &verts[i * 3], &verts[next * 3]);
+            gpu_line(frame, &tmp[i * 3], &tmp[next * 3]);
         }
     } else {
-        gpu_2d_triangle_fill(frame, verts);
+        gpu_2d_triangle_fill(frame, tmp);
     }
 }
 
@@ -215,24 +208,22 @@ void gpu_frame(uint8_t *frame, int counter) {
         1, 1, 0,
         1, -1, 0,
     };
-    gpu_triangle(frame, tri2d1, 0, 0, 0);
+    gpu_triangle(frame, tri2d1, counter, 0, 0);
     float tri2d2[9] = {
         0, 0, 0,
         1, 1, 0,
         1, -1, 0,
     };
-    gpu_triangle(frame, tri2d2, 0, 2, 1);
+    gpu_triangle(frame, tri2d2, counter, -3, 1);
     */
 
     for (int i = 0; i < 4; i++) {
 //        gpu_triangle(frame, &tri3d[i * 9], counter / 2);
     }
     for (int i = 0; i < 12; i++) {
-        #include "shapes.h"
         gpu_triangle(frame, &cube3d[i * 9], counter / 10, 0, 1);
     }
     for (int i = 0; i < 12; i++) {
-        #include "shapes.h"
         gpu_triangle(frame, &cube3d[i * 9], counter / 10, -6, 0);
     }
 }
