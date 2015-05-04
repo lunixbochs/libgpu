@@ -1,4 +1,5 @@
 include_directories(util)
+include_directories(.)
 
 file(GLOB_RECURSE GPU_SOURCES gpu/*.c util/*.c)
 add_library(GPU SHARED ${GPU_SOURCES})

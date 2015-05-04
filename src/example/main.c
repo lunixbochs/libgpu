@@ -2,7 +2,37 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-extern void *gpu_frame(uint8_t *frame, int i);
+#include "gpu/gpu.h"
+
+void draw_frame(uint8_t *frame, int counter) {
+    gpu_clear(frame, 0x00, 0x00, 0x00, 0xFF);
+    #include "shapes.h"
+
+    /*
+    float tri2d1[9] = {
+        0, 0, 0,
+        1, 1, 0,
+        1, -1, 0,
+    };
+    gpu_triangle(frame, tri2d1, counter, 0, 0);
+    float tri2d2[9] = {
+        0, 0, 0,
+        1, 1, 0,
+        1, -1, 0,
+    };
+    gpu_triangle(frame, tri2d2, counter, -3, 1);
+    */
+
+    for (int i = 0; i < 4; i++) {
+//        gpu_triangle(frame, &tri3d[i * 9], counter / 2);
+    }
+    for (int i = 0; i < 12; i++) {
+        gpu_triangle(frame, &cube3d[i * 9], counter / 10, 0, 1);
+    }
+    for (int i = 0; i < 12; i++) {
+        gpu_triangle(frame, &cube3d[i * 9], counter / 10, -6, 0);
+    }
+}
 
 int main() {
     SDL_Init(SDL_INIT_VIDEO);
@@ -34,7 +64,7 @@ int main() {
             }
         }
         SDL_LockSurface(tmp);
-        gpu_frame(tmp->pixels, i);
+        draw_frame(tmp->pixels, i);
         SDL_UnlockSurface(tmp);
         SDL_BlitSurface(tmp, NULL, screen, NULL);
         SDL_UpdateWindowSurface(window);

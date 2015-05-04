@@ -190,40 +190,14 @@ void gpu_triangle(uint8_t *frame, float *verts, float rotate, float offset, bool
     }
 }
 
-void gpu_frame(uint8_t *frame, int counter) {
+void gpu_clear(uint8_t *frame, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     for (int y = 0; y < 480; y++) {
         for (int x = 0; x < 640; x++) {
             uint8_t *pixel = &frame[y * 640 * 4 + x * 4];
-            pixel[0] = 0x00;
-            pixel[1] = 0x00;
-            pixel[2] = 0x00;
-            pixel[3] = 0xFF;
+            pixel[0] = r;
+            pixel[1] = g;
+            pixel[2] = b;
+            pixel[3] = a;
         }
-    }
-    #include "shapes.h"
-
-    /*
-    float tri2d1[9] = {
-        0, 0, 0,
-        1, 1, 0,
-        1, -1, 0,
-    };
-    gpu_triangle(frame, tri2d1, counter, 0, 0);
-    float tri2d2[9] = {
-        0, 0, 0,
-        1, 1, 0,
-        1, -1, 0,
-    };
-    gpu_triangle(frame, tri2d2, counter, -3, 1);
-    */
-
-    for (int i = 0; i < 4; i++) {
-//        gpu_triangle(frame, &tri3d[i * 9], counter / 2);
-    }
-    for (int i = 0; i < 12; i++) {
-        gpu_triangle(frame, &cube3d[i * 9], counter / 10, 0, 1);
-    }
-    for (int i = 0; i < 12; i++) {
-        gpu_triangle(frame, &cube3d[i * 9], counter / 10, -6, 0);
     }
 }
