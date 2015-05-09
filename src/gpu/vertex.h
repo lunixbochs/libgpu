@@ -1,16 +1,26 @@
+#ifndef GPU_VERTEX_H
+#define GPU_VERTEX_H
+
+#include <stddef.h>
 #include <stdint.h>
 
 typedef struct {
-    uint8_t r, g, b, a;
     float x, y, z;
+} pos_t;
+
+typedef struct {
+    uint8_t r, g, b, a;
+} color_t;
+
+typedef struct {
     float s, t, r, q;
+} tex_coord_t;
+
+typedef struct {
+    size_t len;
+    pos_t *pos;
+    color_t *color;
+    tex_coord_t *tex;
 } vertex_t;
 
-vertex_t *vertex_transform(mat, out, in) {
-    if (out == NULL) {
-        out = malloc(sizeof(in));
-    }
-    for (int i = 0; i < count; i++) {
-        transform(out[i], in[i])
-    }
-}
+#endif

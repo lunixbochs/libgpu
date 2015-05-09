@@ -1,7 +1,4 @@
-#include "vectorial/simd4f.h"
-#include "vectorial/simd4x4f.h"
-
-typedef simd4x4f mat4;
+#include "matrix.h"
 
 mat4 *mat4_transpose(mat4 *m) {
     simd4x4f_transpose_inplace(m);
