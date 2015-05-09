@@ -13,4 +13,9 @@
 #define GPU_FLOAT               0x1406
 #define GPU_DOUBLE              0x140A
 
+#define GPU_POINT               0x0000
+#define GPU_LINE                0x0001
+#define GPU_TRIANGLE            0x0004
+#define GPU_QUAD                0x0007
+
 #endif

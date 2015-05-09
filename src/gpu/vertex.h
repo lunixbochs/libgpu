@@ -1,26 +1,12 @@
 #ifndef GPU_VERTEX_H
 #define GPU_VERTEX_H
 
-#include <stddef.h>
-#include <stdint.h>
+#include "types.h"
+#include "matrix.h"
 
-typedef struct {
-    float x, y, z;
-} pos_t;
-
-typedef struct {
-    uint8_t r, g, b, a;
-} color_t;
-
-typedef struct {
-    float s, t, r, q;
-} tex_coord_t;
-
-typedef struct {
-    size_t len;
-    pos_t *pos;
-    color_t *color;
-    tex_coord_t *tex;
-} vertex_t;
+vertex_t *vertex_new();
+void vertex_free(vertex_t *v);
+vertex_t *vertex_copy(vertex_t *in);
+vertex_t *vertex_transform(mat4 *mat, vertex_t *out, vertex_t *in);
 
 #endif

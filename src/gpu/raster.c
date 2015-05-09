@@ -2,8 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "matrix.h"
+#include <string.h>
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b) ? (a) : (b)))
@@ -74,7 +73,7 @@ void gpu_line(uint8_t *frame, float a[2], float b[2]) {
     }
 }
 
-void gpu_2d_triangle_fill(uint8_t *frame, float *t) {
+void gpu_triangle_fill(uint8_t *frame, float *t) {
     float *v1 = &t[0], *v2 = &t[3], *v3 = &t[6];
     float *tmp;
     if (v2[1] < v1[1]) {
@@ -103,13 +102,6 @@ void gpu_2d_triangle_fill(uint8_t *frame, float *t) {
     if (rmid[0] < lmid[0]) {
         SWAP(rmid, lmid);
     }
-    /*
-    printf("top: %.2f, %.2f, %.2f\n", top[0], top[1], top[2]);
-    printf("midl %.2f, %.2f, %.2f\n", lmid[0], lmid[1], lmid[2]);
-    printf("midr %.2f, %.2f, %.2f\n", rmid[0], rmid[1], rmid[2]);
-    printf("bot: %.2f, %.2f, %.2f\n", bot[0], bot[1], bot[2]);
-    printf("\n");
-    */
     // top half
     float ldx, ldy, rdx, rdy, div, lx, rx;
     ldx = top[0] - lmid[0];
@@ -157,47 +149,19 @@ void gpu_2d_triangle_fill(uint8_t *frame, float *t) {
     }
 }
 
-void gpu_triangle(uint8_t *frame, float *verts, float rotate, float offset, bool fill) {
-    mat4 *viewport = mat4_new();
-    mat4_translate(viewport, (640 - 0.5f) / 2.0f, (480 - 0.5f) / 2.0f, -1.0f);
-    mat4_scale(viewport, (640 - 0.5f) / 2.0f, -(480 - 0.5f) / 2.0f, 1.0f);
-
-    mat4 *model = mat4_new();
-    mat4_translate(model, offset + 3.0f, 0, 10.0f);
-    mat4_rotate(model, rotate, 1.0f, 0, 0);
-
-    mat4 *view = mat4_new();
-    mat4_perspective(view, 45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
-
-    float tmp[9];
+void gpu_triangle(uint8_t *frame, float *tri, bool fill) {
     for (int i = 0; i < 3; i++) {
-        float *v = &verts[i * 3];
-        float *t = &tmp[i * 3];
-        mat4_mul_vec3(model, t, v);
-        mat4_mul_vec3(view, t, t);
-        mat4_mul_vec3(viewport, t, t);
+        float *v = &tri[i * 3];
     }
-    if (is_backward(tmp)) {
+    if (is_backward(tri)) {
         return;
     }
     if (!fill) {
         for (int i = 0; i < 3; i++) {
             int next = (i + 1) % 3;
-            gpu_line(frame, &tmp[i * 3], &tmp[next * 3]);
+            gpu_line(frame, &tri[i * 3], &tri[next * 3]);
         }
     } else {
-        gpu_2d_triangle_fill(frame, tmp);
-    }
-}
-
-void gpu_clear(uint8_t *frame, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-    for (int y = 0; y < 480; y++) {
-        for (int x = 0; x < 640; x++) {
-            uint8_t *pixel = &frame[y * 640 * 4 + x * 4];
-            pixel[0] = r;
-            pixel[1] = g;
-            pixel[2] = b;
-            pixel[3] = a;
-        }
+        gpu_triangle_fill(frame, tri);
     }
 }

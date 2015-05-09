@@ -15,6 +15,12 @@ mat4 *mat4_new() {
     return mat4_identity(m);
 }
 
+mat4 *mat4_clone(mat4 *in) {
+    mat4 *m = malloc(sizeof(mat4));
+    memcpy(m, in, sizeof(mat4));
+    return m;
+}
+
 mat4 *mat4_load(mat4 *m, float *load) {
     simd4x4f_uload(m, load);
     return m;
