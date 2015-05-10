@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "matrix.h"
+#include "mm.h"
 #include "vertex.h"
 
 vertex_t *vertex_new() {
@@ -9,17 +10,18 @@ vertex_t *vertex_new() {
 }
 
 void vertex_free(vertex_t *v) {
-    free(v);
-    /*
     free(v->pos);
     free(v->color);
     free(v->tex);
-    */
+    free(v);
 }
 
 vertex_t *vertex_copy(vertex_t *in) {
     vertex_t *out = malloc(sizeof(vertex_t));
-    memcpy(out, in, sizeof(vertex_t));
+    out->len = in->len;
+    out->pos = memdup(in->pos, in->len * sizeof(pos_t));
+    out->color = memdup(in->pos, in->len * sizeof(color_t));
+    out->tex = memdup(in->pos, in->len * sizeof(tex_t));
     return out;
 }
 

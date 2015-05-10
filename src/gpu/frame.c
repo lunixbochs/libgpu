@@ -32,7 +32,7 @@ void gpu_frame_clear(gpu_frame *frame, color_t color) {
 
 void gpu_frame_queue(gpu_frame *frame, gpu_cmd *cmd) {
     tack_push(&frame->queue, cmd);
-    gpu_cmd_incref(cmd);
+    gpu_cmd_free(cmd);
 }
 
 void gpu_frame_render(gpu_frame *frame) {
@@ -40,7 +40,7 @@ void gpu_frame_render(gpu_frame *frame) {
     for (int i = 0; i < len; i++) {
         gpu_cmd *cmd = tack_get(&frame->queue, i);
         gpu_cmd_draw(cmd, frame);
-        gpu_cmd_decref(cmd);
+        gpu_cmd_free(cmd);
     }
 }
 

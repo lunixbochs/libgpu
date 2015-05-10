@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "frame.h"
+
 #ifndef MIN
 #define MIN(a, b) (((a) < (b) ? (a) : (b)))
 #endif
@@ -28,16 +30,16 @@ bool is_backward(float *tri) {
     return ((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) <= 0;
 }
 
-void gpu_pixel(uint8_t *frame, int x, int y) {
-    if (x < 0 || x >= 640 || y < 0 || y >= 480) return;
-    uint8_t *pixel = &frame[x * 4 + y * 640 * 4];
-    pixel[0] = 0xFF;
-    pixel[1] = 0xFF;
-    pixel[2] = 0xFF;
-    pixel[3] = 0xFF;
+void gpu_pixel(gpu_frame *frame, int x, int y) {
+    if (x < 0 || x >= frame->width || y < 0 || y >= frame->height) return;
+    color_t *p = &(frame->buf[x + y * frame->width]);
+    p->r = 0xFF;
+    p->g = 0xFF;
+    p->b = 0xFF;
+    p->a = 0xFF;
 }
 
-void gpu_line(uint8_t *frame, float a[2], float b[2]) {
+void gpu_line(gpu_frame *frame, float a[2], float b[2]) {
     float x1, y1, x2, y2;
     float tmp;
     x1 = a[0], y1 = a[1];
@@ -62,7 +64,7 @@ void gpu_line(uint8_t *frame, float a[2], float b[2]) {
         return;
     }
     float slope = (y2 - y1) / (x2 - x1);
-    for (float x = MAX(x1, 0); x < MIN(x2, 640); x++) {
+    for (float x = MAX(x1, 0); x < MIN(x2, frame->width); x++) {
         float y = slope * (x - x1) + y1;
         if (steep) {
             gpu_pixel(frame, y, x);
@@ -72,7 +74,7 @@ void gpu_line(uint8_t *frame, float a[2], float b[2]) {
     }
 }
 
-void gpu_triangle_fill(uint8_t *frame, float *t) {
+void gpu_triangle_fill(gpu_frame *frame, float *t) {
     float *v1 = &t[0], *v2 = &t[3], *v3 = &t[6];
     float *tmp;
     if (v2[1] < v1[1]) {
@@ -148,7 +150,7 @@ void gpu_triangle_fill(uint8_t *frame, float *t) {
     }
 }
 
-void gpu_triangle(uint8_t *frame, float *tri, bool wire) {
+void gpu_triangle(gpu_frame *frame, float *tri, bool wire) {
     if (is_backward(tri)) {
         return;
     }

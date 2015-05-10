@@ -3,17 +3,12 @@
 #include <stdbool.h>
 
 #include "gpu/cmd.h"
-#include "gpu/frame.h"
-#include "gpu/vertex.h"
 #include "gpu/enum.h"
+#include "gpu/frame.h"
+#include "gpu/mm.h"
 #include "gpu/raster.h"
+#include "gpu/vertex.h"
 #include "util/matrix.h"
-
-void *memdup(void *in, size_t size) {
-    void *out = malloc(size);
-    memcpy(out, in, size);
-    return out;
-}
 
 void draw_frame(uint8_t *frame_out, int counter) {
     mat4 *viewport = mat4_new();
@@ -46,10 +41,8 @@ void draw_frame(uint8_t *frame_out, int counter) {
 
     vertex_t *v1 = vertex_new();
     v1->len = 36;
-    vertex_t *v2 = vertex_new();
-    v2->len = 36;
-    v1->pos = memdup(cube3d, sizeof(pos_t) * 36);
-    v2->pos = memdup(cube3d, sizeof(pos_t) * 36);
+    v1->pos = memdup(cube3d, 36 * sizeof(pos_t));
+    vertex_t *v2 = vertex_copy(v1);
     /*
     vertex_transform(model, v1, v1);
     vertex_transform(model2, v2, v2);
@@ -66,10 +59,7 @@ void draw_frame(uint8_t *frame_out, int counter) {
     gpu_cmd_draw(cmd1, frame);
     gpu_cmd_draw(cmd2, frame);
     gpu_frame_blit(frame, frame_out, GPU_RGBA, GPU_UNSIGNED_BYTE);
-    free(v1->pos);
-    free(v2->pos);
-    vertex_free(v1);
-    vertex_free(v2);
+    gpu_frame_free(frame);
     free(cmd1);
     free(cmd2);
 }
