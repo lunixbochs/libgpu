@@ -1,8 +1,10 @@
 #ifndef GPU_TYPES_H
 #define GPU_TYPES_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+
 #include "tack.h"
 
 typedef struct {
@@ -38,6 +40,7 @@ typedef struct {
 typedef struct {
     uint32_t primitive;
     vertex_t *verts;
+    bool wireframe;
 } gpu_cmd;
 
 #endif

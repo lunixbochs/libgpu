@@ -66,8 +66,8 @@ void draw_frame(uint8_t *frame_out, int counter) {
     vertex_transform(view, v2, v2);
     vertex_transform(viewport, v2, v2);
 
-    gpu_cmd *cmd1 = gpu_cmd_new(GPU_TRIANGLE, v1);
-    gpu_cmd *cmd2 = gpu_cmd_new(GPU_TRIANGLE, v2);
+    gpu_cmd *cmd1 = gpu_cmd_new(GPU_TRIANGLE, v1, false);
+    gpu_cmd *cmd2 = gpu_cmd_new(GPU_TRIANGLE, v2, true);
     gpu_cmd_draw(cmd1, frame);
     gpu_cmd_draw(cmd2, frame);
     gpu_frame_blit(frame, frame_out, GPU_RGBA, GPU_UNSIGNED_BYTE);

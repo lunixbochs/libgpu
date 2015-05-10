@@ -4,10 +4,11 @@
 #include "enum.h"
 #include "raster.h"
 
-gpu_cmd *gpu_cmd_new(uint32_t primitive, vertex_t *verts) {
+gpu_cmd *gpu_cmd_new(uint32_t primitive, vertex_t *verts, bool wireframe) {
     gpu_cmd *cmd = malloc(sizeof(gpu_cmd));
     cmd->primitive = primitive;
     cmd->verts = verts;
+    cmd->wireframe = wireframe;
     return cmd;
 }
 
@@ -20,7 +21,7 @@ void gpu_cmd_draw(gpu_cmd *cmd, gpu_frame *frame) {
     }
     */
     for (int i = 0; i < cmd->verts->len; i++) {
-        gpu_triangle(frame->buf, (float *)&cmd->verts->pos[i], 0);
+        gpu_triangle(frame->buf, (float *)&cmd->verts->pos[i], cmd->wireframe);
     }
 }
 
