@@ -41,25 +41,19 @@ mat4 *mat4_rotate(mat4 *m, float angle, float x, float y, float z) {
     float radians = angle * VECTORIAL_PI / 180;
     simd4x4f rotate, out;
     simd4x4f_axis_rotation(&rotate, radians, simd4f_create(x, y, z, 1.0f));
-    simd4x4f_matrix_mul(m, &rotate, &out);
-    *m = out;
-    return m;
+    return mat4_mul(m, &rotate);
 }
 
 mat4 *mat4_scale(mat4 *m, float x, float y, float z) {
     simd4x4f scale, out;
     simd4x4f_scaling(&scale, x, y, z);
-    simd4x4f_matrix_mul(m, &scale, &out);
-    *m = out;
-    return m;
+    return mat4_mul(m, &scale);
 }
 
 mat4 *mat4_translate(mat4 *m, float x, float y, float z) {
     simd4x4f translate, out;
     simd4x4f_translation(&translate, x, y, z);
-    simd4x4f_matrix_mul(m, &translate, &out);
-    *m = out;
-    return m;
+    return mat4_mul(m, &translate);
 }
 
 mat4 *mat4_ortho(mat4 *m, float left, float right,
@@ -67,9 +61,7 @@ mat4 *mat4_ortho(mat4 *m, float left, float right,
                           float near, float far) {
     simd4x4f ortho, out;
     simd4x4f_ortho(&ortho, left, right, bottom, top, near, far);
-    simd4x4f_matrix_mul(m, &ortho, &out);
-    *m = out;
-    return m;
+    return mat4_mul(m, &ortho);
 }
 
 mat4 *mat4_frustum(mat4 *m, float left, float right,
@@ -77,17 +69,13 @@ mat4 *mat4_frustum(mat4 *m, float left, float right,
                             float near, float far) {
     simd4x4f frustum, out;
     simd4x4f_frustum(&frustum, left, right, bottom, top, near, far);
-    simd4x4f_matrix_mul(m, &frustum, &out);
-    *m = out;
-    return m;
+    return mat4_mul(m, &frustum);
 }
 
 mat4 *mat4_perspective(mat4 *m, float fov, float aspect, float znear, float zfar) {
     simd4x4f perspective, out;
     simd4x4f_perspective(&perspective, fov, aspect, znear, zfar);
-    simd4x4f_matrix_mul(m, &perspective, &out);
-    *m = out;
-    return m;
+    return mat4_mul(m, &perspective);
 }
 
 void mat4_mul_vec2(mat4 *m, float out[2], const float in[2]) {
