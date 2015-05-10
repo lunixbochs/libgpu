@@ -15,10 +15,11 @@ void draw_frame(uint8_t *frame_out, int counter) {
     mat4_translate(viewport, (640 - 0.5f) / 2.0f, (480 - 0.5f) / 2.0f, -1.0f);
     mat4_scale(viewport, (640 - 0.5f) / 2.0f, -(480 - 0.5f) / 2.0f, 1.0f);
 
-    mat4 *model = mat4_new();
-    mat4_translate(model, 3.0f, 0, 10.0f);
     float rotate = counter / 10;
-    mat4_rotate(model, rotate, 1.0f, 0, 0);
+    mat4 *model = mat4_new();
+    mat4_translate(model, 0, 0, 10.0f);
+    mat4_rotate(model, rotate, 1.0f, 1.0f, 0);
+    mat4_translate(model, 3.0f, 0, 0);
 
     mat4 *model2 = mat4_clone(model);
     mat4_translate(model2, -6.0f, 0.0f, 0.0f);
