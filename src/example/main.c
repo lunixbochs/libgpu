@@ -104,6 +104,9 @@ int main() {
         }
         SDL_LockSurface(screen);
         draw_frame(screen->pixels, i);
+        if (!click) {
+            i += 10;
+        }
         SDL_UnlockSurface(screen);
         SDL_UpdateTexture(sdlTexture, NULL, screen->pixels, screen->pitch);
         SDL_RenderClear(renderer);
