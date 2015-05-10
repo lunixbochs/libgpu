@@ -1,6 +1,5 @@
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -149,14 +148,11 @@ void gpu_triangle_fill(uint8_t *frame, float *t) {
     }
 }
 
-void gpu_triangle(uint8_t *frame, float *tri, bool fill) {
-    for (int i = 0; i < 3; i++) {
-        float *v = &tri[i * 3];
-    }
+void gpu_triangle(uint8_t *frame, float *tri, bool wire) {
     if (is_backward(tri)) {
         return;
     }
-    if (!fill) {
+    if (wire) {
         for (int i = 0; i < 3; i++) {
             int next = (i + 1) % 3;
             gpu_line(frame, &tri[i * 3], &tri[next * 3]);

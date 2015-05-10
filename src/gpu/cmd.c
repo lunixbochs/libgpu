@@ -13,15 +13,14 @@ gpu_cmd *gpu_cmd_new(uint32_t primitive, vertex_t *verts, bool wireframe) {
 }
 
 void gpu_cmd_draw(gpu_cmd *cmd, gpu_frame *frame) {
-    /*
     switch (cmd->primitive) {
     case GPU_TRIANGLE:
+        for (int i = 0; i < cmd->verts->len - 2; i += 3) {
+            gpu_triangle(frame->buf, (float *)&cmd->verts->pos[i], cmd->wireframe);
+        }
+        break;
     default:
         abort();
-    }
-    */
-    for (int i = 0; i < cmd->verts->len; i++) {
-        gpu_triangle(frame->buf, (float *)&cmd->verts->pos[i], cmd->wireframe);
     }
 }
 

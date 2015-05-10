@@ -9,7 +9,7 @@
 #include "gpu/raster.h"
 #include "util/matrix.h"
 
-void *memdup(void *in, void *size) {
+void *memdup(void *in, size_t size) {
     void *out = malloc(size);
     memcpy(out, in, size);
     return out;
@@ -44,25 +44,20 @@ void draw_frame(uint8_t *frame_out, int counter) {
 
     #include "shapes.h"
 
-    vertex_t *v = vertex_new();
-    v->pos = malloc(sizeof(pos_t) * 36);
-    // v->pos = (pos_t *)cube3d;
-    memcpy(v->pos, cube3d, sizeof(pos_t) * 36);
-    v->len = 36; // = sizeof(cube3d) / sizeof(float) / 3;
-
+    vertex_t *v1 = vertex_new();
+    v1->len = 36;
+    vertex_t *v2 = vertex_new();
+    v2->len = 36;
+    v1->pos = memdup(cube3d, sizeof(pos_t) * 36);
+    v2->pos = memdup(cube3d, sizeof(pos_t) * 36);
     /*
-    vertex_t *v1 = vertex_transform(model, NULL, v);
-    vertex_t *v2 = vertex_transform(model2, NULL, v);
+    vertex_transform(model, v1, v1);
+    vertex_transform(model2, v2, v2);
     */
-    vertex_t *v1, *v2;
-    v1 = vertex_copy(v);
-    v2 = vertex_copy(v);
-    v1->pos = memdup(v->pos, sizeof(pos_t) * v1->len);
-    v2->pos = memdup(v->pos, sizeof(pos_t) * v2->len);
     vertex_transform(model, v1, v1);
     vertex_transform(view, v1, v1);
     vertex_transform(viewport, v1, v1);
-    vertex_transform(model, v2, v2);
+    vertex_transform(model2, v2, v2);
     vertex_transform(view, v2, v2);
     vertex_transform(viewport, v2, v2);
 
@@ -71,7 +66,8 @@ void draw_frame(uint8_t *frame_out, int counter) {
     gpu_cmd_draw(cmd1, frame);
     gpu_cmd_draw(cmd2, frame);
     gpu_frame_blit(frame, frame_out, GPU_RGBA, GPU_UNSIGNED_BYTE);
-    vertex_free(v);
+    free(v1->pos);
+    free(v2->pos);
     vertex_free(v1);
     vertex_free(v2);
     free(cmd1);
