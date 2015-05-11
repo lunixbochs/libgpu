@@ -150,16 +150,16 @@ void gpu_triangle_fill(gpu_frame *frame, float *t) {
     }
 }
 
-void gpu_triangle(gpu_frame *frame, float *tri, bool wire) {
+void gpu_triangle(gpu_frame *frame, vertex_t *verts, bool wire) {
     if (is_backward(tri)) {
         return;
     }
     if (wire) {
         for (int i = 0; i < 3; i++) {
             int next = (i + 1) % 3;
-            gpu_line(frame, &tri[i * 3], &tri[next * 3]);
+            gpu_line(frame, verts, i * 3, verts, next * 3);
         }
     } else {
-        gpu_triangle_fill(frame, tri);
+        gpu_triangle_fill(frame, verts);
     }
 }

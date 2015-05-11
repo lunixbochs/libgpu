@@ -10,10 +10,10 @@
 #include "gpu/vertex.h"
 #include "util/matrix.h"
 
-void draw_frame(uint8_t *frame_out, int counter) {
+void draw_frame(uint8_t *frame_out, int width, int height, int counter) {
     mat4 *viewport = mat4_new();
-    mat4_translate(viewport, (640 - 0.5f) / 2.0f, (480 - 0.5f) / 2.0f, -1.0f);
-    mat4_scale(viewport, (640 - 0.5f) / 2.0f, -(480 - 0.5f) / 2.0f, 1.0f);
+    mat4_translate(viewport, (width - 0.5f) / 2.0f, (height - 0.5f) / 2.0f, -1.0f);
+    mat4_scale(viewport, (width - 0.5f) / 2.0f, -(height - 0.5f) / 2.0f, 1.0f);
 
     float rotate = counter / 10;
     mat4 *model = mat4_new();
@@ -25,7 +25,7 @@ void draw_frame(uint8_t *frame_out, int counter) {
     mat4_translate(model2, -6.0f, 0.0f, 0.0f);
 
     mat4 *view = mat4_new();
-    mat4_perspective(view, 45.0f, 640.0f / 480.0f, 0.1f, 100.0f);
+    mat4_perspective(view, 45.0f, (float)width / (float)height, 0.1f, 100.0f);
 
     /*
     mat4_mul(model, view);
@@ -34,7 +34,7 @@ void draw_frame(uint8_t *frame_out, int counter) {
     mat4_mul(model2, viewport);
     */
 
-    gpu_frame *frame = gpu_frame_new(640, 480);
+    gpu_frame *frame = gpu_frame_new(width, height);
     color_t clear_color = {0x00, 0x00, 0x00, 0xFF};
     gpu_frame_clear(frame, clear_color);
 
@@ -66,11 +66,13 @@ void draw_frame(uint8_t *frame_out, int counter) {
 }
 
 int main() {
+    int width = 800;
+    int height = 480;
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window *window;
     SDL_Renderer *renderer;
-    SDL_CreateWindowAndRenderer(640, 480, 0, &window, &renderer);
-    SDL_Surface *screen = SDL_CreateRGBSurface(0, 640, 480, 32,
+    SDL_CreateWindowAndRenderer(width, height, 0, &window, &renderer);
+    SDL_Surface *screen = SDL_CreateRGBSurface(0, width, height, 32,
                                                0x00FF0000,
                                                0x0000FF00,
                                                0x000000FF,
@@ -78,7 +80,7 @@ int main() {
     SDL_Texture *sdlTexture = SDL_CreateTexture(renderer,
                                                 SDL_PIXELFORMAT_ARGB8888,
                                                 SDL_TEXTUREACCESS_STREAMING,
-                                                640, 480);
+                                                width, height);
     int i = 0;
     bool done = false;
     bool click = false;
@@ -103,7 +105,7 @@ int main() {
             }
         }
         SDL_LockSurface(screen);
-        draw_frame(screen->pixels, i);
+        draw_frame(screen->pixels, width, height, i);
         if (!click) {
             i += 10;
         }

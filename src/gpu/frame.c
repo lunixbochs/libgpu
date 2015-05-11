@@ -22,9 +22,9 @@ void gpu_frame_free(gpu_frame *frame) {
 }
 
 void gpu_frame_clear(gpu_frame *frame, color_t color) {
-    for (int y = 0; y < 480; y++) {
-        for (int x = 0; x < 640; x++) {
-            color_t *pixel = &frame->buf[y * 640 + x];
+    for (int y = 0; y < frame->height; y++) {
+        for (int x = 0; x < frame->width; x++) {
+            color_t *pixel = &frame->buf[y * frame->width + x];
             *pixel = color;
         }
     }
@@ -45,7 +45,7 @@ void gpu_frame_render(gpu_frame *frame) {
 }
 
 void gpu_frame_blit(gpu_frame *frame, void *out, uint32_t type, uint32_t format) {
-    memcpy(out, frame->buf, 640 * 480 * 4);
+    memcpy(out, frame->buf, frame->width * frame->height * sizeof(color_t));
     return;
     pixel_convert(frame->buf, &out, frame->width, frame->height, GPU_RGBA, GPU_UNSIGNED_BYTE, type, format);
 }
