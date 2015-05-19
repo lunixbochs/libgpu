@@ -1,81 +1,72 @@
 #include "matrix.h"
 
-mat4 *mat4_transpose(mat4 *m) {
+mat4 mat4_new() {
+    mat4 out;
+    mat4_identity(&out);
+    return out;
+}
+
+void mat4_transpose(mat4 *m) {
     simd4x4f_transpose_inplace(m);
-    return m;
 }
 
-mat4 *mat4_identity(mat4 *m) {
+void mat4_identity(mat4 *m) {
     simd4x4f_identity(m);
-    return m;
 }
 
-mat4 *mat4_new() {
-    mat4 *m = malloc(sizeof(mat4));
-    return mat4_identity(m);
-}
-
-mat4 *mat4_clone(mat4 *in) {
-    mat4 *m = malloc(sizeof(mat4));
-    memcpy(m, in, sizeof(mat4));
-    return m;
-}
-
-mat4 *mat4_load(mat4 *m, float *load) {
+void mat4_load(mat4 *m, float *load) {
     simd4x4f_uload(m, load);
-    return m;
 }
 
 void mat4_save(mat4 *m, float *out) {
     simd4x4f_ustore(m, out);
 }
 
-mat4 *mat4_mul(mat4 *m, mat4 *quotient) {
+void mat4_mul(mat4 *m, mat4 *quotient) {
     simd4x4f out;
     simd4x4f_matrix_mul(m, quotient, &out);
     *m = out;
-    return m;
 }
 
-mat4 *mat4_rotate(mat4 *m, float angle, float x, float y, float z) {
+void mat4_rotate(mat4 *m, float angle, float x, float y, float z) {
     float radians = angle * VECTORIAL_PI / 180;
-    simd4x4f rotate, out;
+    simd4x4f rotate;
     simd4x4f_axis_rotation(&rotate, radians, simd4f_create(x, y, z, 1.0f));
-    return mat4_mul(m, &rotate);
+    mat4_mul(m, &rotate);
 }
 
-mat4 *mat4_scale(mat4 *m, float x, float y, float z) {
-    simd4x4f scale, out;
+void mat4_scale(mat4 *m, float x, float y, float z) {
+    simd4x4f scale;
     simd4x4f_scaling(&scale, x, y, z);
-    return mat4_mul(m, &scale);
+    mat4_mul(m, &scale);
 }
 
-mat4 *mat4_translate(mat4 *m, float x, float y, float z) {
-    simd4x4f translate, out;
+void mat4_translate(mat4 *m, float x, float y, float z) {
+    simd4x4f translate;
     simd4x4f_translation(&translate, x, y, z);
-    return mat4_mul(m, &translate);
+    mat4_mul(m, &translate);
 }
 
-mat4 *mat4_ortho(mat4 *m, float left, float right,
+void mat4_ortho(mat4 *m, float left, float right,
                           float bottom, float top,
                           float near, float far) {
-    simd4x4f ortho, out;
+    simd4x4f ortho;
     simd4x4f_ortho(&ortho, left, right, bottom, top, near, far);
-    return mat4_mul(m, &ortho);
+    mat4_mul(m, &ortho);
 }
 
-mat4 *mat4_frustum(mat4 *m, float left, float right,
-                            float bottom, float top,
-                            float near, float far) {
-    simd4x4f frustum, out;
+void mat4_frustum(mat4 *m, float left, float right,
+                           float bottom, float top,
+                           float near, float far) {
+    simd4x4f frustum;
     simd4x4f_frustum(&frustum, left, right, bottom, top, near, far);
-    return mat4_mul(m, &frustum);
+    mat4_mul(m, &frustum);
 }
 
-mat4 *mat4_perspective(mat4 *m, float fov, float aspect, float znear, float zfar) {
-    simd4x4f perspective, out;
+void mat4_perspective(mat4 *m, float fov, float aspect, float znear, float zfar) {
+    simd4x4f perspective;
     simd4x4f_perspective(&perspective, fov, aspect, znear, zfar);
-    return mat4_mul(m, &perspective);
+    mat4_mul(m, &perspective);
 }
 
 void mat4_mul_vec2(mat4 *m, float out[2], const float in[2]) {

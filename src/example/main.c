@@ -11,21 +11,21 @@
 #include "util/matrix.h"
 
 void draw_frame(uint8_t *frame_out, int width, int height, int counter) {
-    mat4 *viewport = mat4_new();
-    mat4_translate(viewport, (width - 0.5f) / 2.0f, (height - 0.5f) / 2.0f, -1.0f);
-    mat4_scale(viewport, (width - 0.5f) / 2.0f, -(height - 0.5f) / 2.0f, 1.0f);
+    mat4 viewport = mat4_new();
+    mat4_translate(&viewport, (width - 0.5f) / 2.0f, (height - 0.5f) / 2.0f, -1.0f);
+    mat4_scale(&viewport, (width - 0.5f) / 2.0f, -(height - 0.5f) / 2.0f, 1.0f);
 
     float rotate = counter / 10;
-    mat4 *model = mat4_new();
-    mat4_translate(model, 0, 0, 10.0f);
-    mat4_rotate(model, rotate, 1.0f, 1.0f, 0);
-    mat4_translate(model, 3.0f, 0, 0);
+    mat4 model = mat4_new();
+    mat4_translate(&model, 0, 0, 10.0f);
+    mat4_rotate(&model, rotate, 1.0f, 1.0f, 0);
+    mat4_translate(&model, 3.0f, 0, 0);
 
-    mat4 *model2 = mat4_clone(model);
-    mat4_translate(model2, -6.0f, 0.0f, 0.0f);
+    mat4 model2 = model;
+    mat4_translate(&model2, -6.0f, 0.0f, 0.0f);
 
-    mat4 *view = mat4_new();
-    mat4_perspective(view, 45.0f, (float)width / (float)height, 0.1f, 100.0f);
+    mat4 view = mat4_new();
+    mat4_perspective(&view, 45.0f, (float)width / (float)height, 0.1f, 100.0f);
 
     /*
     mat4_mul(model, view);
@@ -48,12 +48,12 @@ void draw_frame(uint8_t *frame_out, int width, int height, int counter) {
     vertex_transform(model, v1, v1);
     vertex_transform(model2, v2, v2);
     */
-    vertex_transform(model, v1, v1);
-    vertex_transform(view, v1, v1);
-    vertex_transform(viewport, v1, v1);
-    vertex_transform(model2, v2, v2);
-    vertex_transform(view, v2, v2);
-    vertex_transform(viewport, v2, v2);
+    vertex_transform(&model, v1, v1);
+    vertex_transform(&view, v1, v1);
+    vertex_transform(&viewport, v1, v1);
+    vertex_transform(&model2, v2, v2);
+    vertex_transform(&view, v2, v2);
+    vertex_transform(&viewport, v2, v2);
 
     gpu_cmd *cmd1 = gpu_cmd_new(GPU_TRIANGLE, v1, false);
     gpu_cmd *cmd2 = gpu_cmd_new(GPU_TRIANGLE, v2, true);
