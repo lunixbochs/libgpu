@@ -22,7 +22,7 @@ void gpu_cmd_draw(gpu_cmd *cmd, gpu_frame *frame) {
     switch (cmd->primitive) {
     case GPU_TRIANGLE:
         for (int i = 0; i < cmd->verts->len - 2; i += 3) {
-            gpu_triangle(frame, (float *)&cmd->verts->pos[i], cmd->wireframe);
+            gpu_triangle(frame, cmd->verts, i, cmd->wireframe);
         }
         break;
     default:

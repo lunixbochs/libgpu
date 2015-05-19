@@ -23,11 +23,11 @@
 
 #define SWAP(a, b) do { tmp = (a); (a) = (b); (b) = (tmp); } while (0);
 
-bool is_backward(float *tri) {
-    float *a = &tri[0];
-    float *b = &tri[3];
-    float *c = &tri[6];
-    return ((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) <= 0;
+bool is_backward(vertex_t *tri, int index) {
+    pos_t *a = &tri->pos[index+0];
+    pos_t *b = &tri->pos[index+1];
+    pos_t *c = &tri->pos[index+2];
+    return ((b->x - a->x) * (c->y - a->y) - (b->y - a->y) * (c->x - a->x)) <= 0;
 }
 
 void gpu_pixel(gpu_frame *frame, int x, int y) {
@@ -39,12 +39,12 @@ void gpu_pixel(gpu_frame *frame, int x, int y) {
     p->a = 0xFF;
 }
 
-void gpu_line(gpu_frame *frame, float a[2], float b[2]) {
+void gpu_line(gpu_frame *frame, pos_t *a, pos_t *b) {
     float x1, y1, x2, y2;
     float tmp;
-    x1 = a[0], y1 = a[1];
-    x2 = b[0], y2 = b[1];
-    bool steep = ABS(b[1] - a[1]) > ABS(b[0] - a[0]);
+    x1 = a->x, y1 = a->y;
+    x2 = b->x, y2 = b->y;
+    bool steep = ABS(b->y - a->y) > ABS(b->x - a->x);
     if (steep) {
         SWAP(x1, y1);
         SWAP(x2, y2);
@@ -74,41 +74,41 @@ void gpu_line(gpu_frame *frame, float a[2], float b[2]) {
     }
 }
 
-void gpu_triangle_fill(gpu_frame *frame, float *t) {
-    float *v1 = &t[0], *v2 = &t[3], *v3 = &t[6];
-    float *tmp;
-    if (v2[1] < v1[1]) {
+void gpu_triangle_fill(gpu_frame *frame, vertex_t *v) {
+    pos_t *v1 = &v->pos[0], *v2 = &v->pos[1], *v3 = &v->pos[2];
+    pos_t *tmp;
+    if (v2->y < v1->y) {
         SWAP(v2, v1);
     }
-    if (v3[1] < v1[1]) {
+    if (v3->y < v1->y) {
         SWAP(v3, v2);
         SWAP(v2, v1);
-    } else if (v3[1] < v2[1]) {
+    } else if (v3->y < v2->y) {
         SWAP(v3, v2);
     }
-    float *top = v3, *lmid = v2, *bot = v1;
-    float *rmid, rmidb[3];
-    if (top[1] == lmid[1]) {
+    pos_t *top = v3, *lmid = v2, *bot = v1;
+    pos_t *rmid, rmidb;
+    if (top->y == lmid->y) {
         rmid = top;
     } else {
-        float rslope = (top[0] - bot[0]) / (top[1] - bot[1]);
+        float rslope = (top->x - bot->x) / (top->y - bot->y);
         float tmid[3] = {
-            (lmid[1] - bot[1]) * rslope + bot[0],
-            lmid[1],
+            (lmid->y - bot->y) * rslope + bot->x,
+            lmid->y,
             0, // tbd
         };
-        memcpy(rmidb, tmid, sizeof(rmid));
-        rmid = rmidb;
+        memcpy(&rmidb, tmid, sizeof(pos_t));
+        rmid = &rmidb;
     }
-    if (rmid[0] < lmid[0]) {
+    if (rmid->x < lmid->x) {
         SWAP(rmid, lmid);
     }
     // top half
     float ldx, ldy, rdx, rdy, div, lx, rx;
-    ldx = top[0] - lmid[0];
-    ldy = top[1] - lmid[1];
-    rdx = top[0] - rmid[0];
-    rdy = top[1] - rmid[1];
+    ldx = top->x - lmid->x;
+    ldy = top->y - lmid->y;
+    rdx = top->x - rmid->x;
+    rdy = top->y - rmid->y;
     div = ldy + 1;
     if (div != 0) {
         div = 1.0 / div;
@@ -116,21 +116,21 @@ void gpu_triangle_fill(gpu_frame *frame, float *t) {
         ldy *= div;
         rdx *= div;
         rdy *= div;
-        lx = lmid[0];
-        rx = rmid[0];
-        for (int y = lmid[1]; y < top[1]; y += 1) {
-            float p1[] = {lx, y};
-            float p2[] = {rx, y};
-            gpu_line(frame, p1, p2);
+        lx = lmid->x;
+        rx = rmid->x;
+        for (int y = lmid->y; y < top->y; y += 1) {
+            pos_t p1 = {lx, y, 0};
+            pos_t p2 = {rx, y, 0};
+            gpu_line(frame, &p1, &p2);
             lx += ldx;
             rx += rdx;
         }
     }
     // bottom half
-    ldx = lmid[0] - bot[0];
-    ldy = lmid[1] - bot[1];
-    rdx = rmid[0] - bot[0];
-    rdy = rmid[1] - bot[1];
+    ldx = lmid->x - bot->x;
+    ldy = lmid->y - bot->y;
+    rdx = rmid->x - bot->x;
+    rdy = rmid->y - bot->y;
     div = ldy + 1;
     if (div != 0) {
         div = 1.0 / div;
@@ -138,26 +138,26 @@ void gpu_triangle_fill(gpu_frame *frame, float *t) {
         ldy *= div;
         rdx *= div;
         rdy *= div;
-        lx = bot[0];
-        rx = bot[0];
-        for (int y = bot[1]; y < lmid[1]; y += 1) {
-            float p1[] = {lx, y};
-            float p2[] = {rx, y};
-            gpu_line(frame, p1, p2);
+        lx = bot->x;
+        rx = bot->x;
+        for (int y = bot->y; y < lmid->y; y += 1) {
+            pos_t p1 = {lx, y, 0};
+            pos_t p2 = {rx, y, 0};
+            gpu_line(frame, &p1, &p2);
             lx += ldx;
             rx += rdx;
         }
     }
 }
 
-void gpu_triangle(gpu_frame *frame, vertex_t *verts, bool wire) {
-    if (is_backward(tri)) {
+void gpu_triangle(gpu_frame *frame, vertex_t *verts, int index, bool wire) {
+    if (is_backward(verts, index)) {
         return;
     }
     if (wire) {
-        for (int i = 0; i < 3; i++) {
+        for (int i = index; i < index + 3; i++) {
             int next = (i + 1) % 3;
-            gpu_line(frame, verts, i * 3, verts, next * 3);
+            gpu_line(frame, &verts->pos[i], &verts->pos[next]);
         }
     } else {
         gpu_triangle_fill(frame, verts);
