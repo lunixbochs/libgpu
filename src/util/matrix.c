@@ -73,7 +73,7 @@ void mat4_mul_vec2(mat4 *m, float out[2], const float in[2]) {
     simd4f tmp, vert = simd4f_create(in[0], in[1], 0.0f, 1.0f);
     simd4x4f_matrix_vector_mul(m, &vert, &tmp);
     tmp = simd4f_div(tmp, simd4f_splat_w(tmp));
-    simd4f_ustore3(tmp, out);
+    simd4f_ustore2(tmp, out);
 }
 
 void mat4_mul_vec3(mat4 *m, float out[3], const float in[3]) {
