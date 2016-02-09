@@ -15,7 +15,7 @@ void draw_frame(uint8_t *frame_out, int width, int height, int counter) {
     mat4_translate(&viewport, (width - 0.5f) / 2.0f, (height - 0.5f) / 2.0f, -1.0f);
     mat4_scale(&viewport, (width - 0.5f) / 2.0f, -(height - 0.5f) / 2.0f, 1.0f);
 
-    float rotate = counter / 10;
+    float rotate = counter / 10.0;
     mat4 model = mat4_new();
     mat4_translate(&model, 0, 0, 10.0f);
     mat4_rotate(&model, rotate, 1.0f, 1.0f, 0);
