@@ -8,17 +8,12 @@
 #include "enum.h"
 #include "pixel.h"
 
-gpu_frame *gpu_frame_new(uint32_t width, uint32_t height) {
-    gpu_frame *f = malloc(sizeof(gpu_frame));
-    f->buf = malloc(width * height * 4);
-    f->width = width;
-    f->height = height;
-    return f;
-}
-
-void gpu_frame_free(gpu_frame *frame) {
-    free(frame->buf);
-    free(frame);
+gpu_frame gpu_frame_init(void *buf, uint32_t width, uint32_t height) {
+    return (gpu_frame){
+        .buf = buf,
+        .width = width,
+        .height = height,
+    };
 }
 
 void gpu_frame_clear(gpu_frame *frame, color_t color) {
@@ -42,10 +37,4 @@ void gpu_frame_render(gpu_frame *frame) {
         gpu_cmd_draw(cmd, frame);
         gpu_cmd_free(cmd);
     }
-}
-
-void gpu_frame_blit(gpu_frame *frame, void *out, uint32_t type, uint32_t format) {
-    memcpy(out, frame->buf, frame->width * frame->height * sizeof(color_t));
-    return;
-    pixel_convert(frame->buf, &out, frame->width, frame->height, GPU_RGBA, GPU_UNSIGNED_BYTE, type, format);
 }

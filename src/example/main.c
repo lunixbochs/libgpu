@@ -34,9 +34,9 @@ void draw_frame(uint8_t *frame_out, int width, int height, int counter) {
     mat4_mul(model2, viewport);
     */
 
-    gpu_frame *frame = gpu_frame_new(width, height);
+    gpu_frame frame = gpu_frame_init(frame_out, width, height);
     color_t clear_color = {0x00, 0x00, 0x00, 0xFF};
-    gpu_frame_clear(frame, clear_color);
+    gpu_frame_clear(&frame, clear_color);
 
     #include "shapes.h"
 
@@ -57,10 +57,8 @@ void draw_frame(uint8_t *frame_out, int width, int height, int counter) {
 
     gpu_cmd *cmd1 = gpu_cmd_new(GPU_TRIANGLE, v1, false);
     gpu_cmd *cmd2 = gpu_cmd_new(GPU_TRIANGLE, v2, true);
-    gpu_cmd_draw(cmd1, frame);
-    gpu_cmd_draw(cmd2, frame);
-    gpu_frame_blit(frame, frame_out, GPU_RGBA, GPU_UNSIGNED_BYTE);
-    gpu_frame_free(frame);
+    gpu_cmd_draw(cmd1, &frame);
+    gpu_cmd_draw(cmd2, &frame);
     free(cmd1);
     free(cmd2);
 }
