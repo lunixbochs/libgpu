@@ -66,21 +66,16 @@ void draw_frame(uint8_t *frame_out, int width, int height, int counter) {
 }
 
 int main() {
-    int width = 800;
-    int height = 480;
+    int width = 1280;
+    int height = 720;
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window *window;
     SDL_Renderer *renderer;
-    SDL_CreateWindowAndRenderer(width, height, 0, &window, &renderer);
-    SDL_Surface *screen = SDL_CreateRGBSurface(0, width, height, 32,
-                                               0x00FF0000,
-                                               0x0000FF00,
-                                               0x000000FF,
-                                               0xFF000000);
-    SDL_Texture *sdlTexture = SDL_CreateTexture(renderer,
-                                                SDL_PIXELFORMAT_ARGB8888,
-                                                SDL_TEXTUREACCESS_STREAMING,
-                                                width, height);
+    SDL_CreateWindowAndRenderer(width, height, SDL_WINDOW_RESIZABLE, &window, &renderer);
+    SDL_Texture *texture = SDL_CreateTexture(renderer,
+            SDL_PIXELFORMAT_ARGB8888,
+            SDL_TEXTUREACCESS_STREAMING,
+            width, height);
     int i = 0;
     bool done = false;
     bool click = false;
@@ -102,17 +97,26 @@ int main() {
                         i += (event.motion.xrel + event.motion.yrel) * 10;
                     }
                     break;
+                case SDL_WINDOWEVENT_RESIZED:
+                    width = event.window.data1;
+                    height = event.window.data2;
+                    SDL_DestroyTexture(texture);
+                    SDL_Texture *texture = SDL_CreateTexture(renderer,
+                            SDL_PIXELFORMAT_ARGB8888,
+                            SDL_TEXTUREACCESS_STREAMING,
+                            width, height);
+                    break;
             }
         }
-        SDL_LockSurface(screen);
-        draw_frame(screen->pixels, width, height, i);
+        void *pixels = NULL;
+        int pitch = 0;
+        SDL_LockTexture(texture, NULL, &pixels, &pitch);
+        draw_frame(pixels, width, height, i);
         if (!click) {
             i += 10;
         }
-        SDL_UnlockSurface(screen);
-        SDL_UpdateTexture(sdlTexture, NULL, screen->pixels, screen->pitch);
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, sdlTexture, NULL, NULL);
+        SDL_UnlockTexture(texture);
+        SDL_RenderCopy(renderer, texture, NULL, NULL);
         SDL_RenderPresent(renderer);
     }
     SDL_DestroyWindow(window);
