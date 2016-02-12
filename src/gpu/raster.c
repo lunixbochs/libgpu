@@ -48,8 +48,10 @@ void gpu_line(gpu_frame *frame, pos_t *a, pos_t *b) {
     float tmp;
     x1 = a->x, y1 = a->y;
     x2 = b->x, y2 = b->y;
+    float max = frame->width;
     bool steep = ABS(y2 - y1) > ABS(x2 - x1);
     if (steep) {
+        max = frame->height;
         SWAP(x1, y1);
         SWAP(x2, y2);
     }
@@ -58,7 +60,7 @@ void gpu_line(gpu_frame *frame, pos_t *a, pos_t *b) {
         SWAP(y1, y2);
     }
     float slope = (y2 - y1) / (x2 - x1);
-    for (float x = MAX(x1, 0); x < MIN(x2, frame->width); x++) {
+    for (float x = MAX(x1, 0); x < MIN(x2, max); x++) {
         float y = slope * (x - x1) + y1;
         if (steep) {
             gpu_pixel(frame, y, x);
@@ -114,8 +116,10 @@ void gpu_triangle_fill(gpu_frame *frame, vertex_t *v, int index) {
         lx = lmid->x;
         rx = rmid->x;
         for (int y = lmid->y; y < top->y; y += 1) {
-            color_t *pixel = gpu_pixel_at(frame, lx, y);
-            for (int x = lx; x < rx; x++) {
+            float tlx = MAX(0, MIN(lx, frame->width));
+            float trx = MAX(0, MIN(rx, frame->width));
+            color_t *pixel = gpu_pixel_at(frame, tlx, y);
+            for (int x = tlx; x < trx; x++) {
                 *pixel++ = white;
             }
             lx += ldx;
@@ -137,8 +141,10 @@ void gpu_triangle_fill(gpu_frame *frame, vertex_t *v, int index) {
         lx = bot->x;
         rx = bot->x;
         for (int y = bot->y; y < lmid->y; y += 1) {
-            color_t *pixel = gpu_pixel_at(frame, lx, y);
-            for (int x = lx; x < rx; x++) {
+            float tlx = MAX(0, MIN(lx, frame->width));
+            float trx = MAX(0, MIN(rx, frame->width));
+            color_t *pixel = gpu_pixel_at(frame, tlx, y);
+            for (int x = tlx; x < trx; x++) {
                 *pixel++ = white;
             }
             lx += ldx;
