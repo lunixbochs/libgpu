@@ -96,15 +96,18 @@ int main() {
                         i += (event.motion.xrel + event.motion.yrel) * 10;
                     }
                     break;
-                case SDL_WINDOWEVENT_RESIZED:
-                    width = event.window.data1;
-                    height = event.window.data2;
-                    SDL_DestroyTexture(texture);
-                    SDL_Texture *texture = SDL_CreateTexture(renderer,
-                            SDL_PIXELFORMAT_ARGB8888,
-                            SDL_TEXTUREACCESS_STREAMING,
-                            width, height);
-                    break;
+                case SDL_WINDOWEVENT:
+                    switch (event.window.event) {
+                        case SDL_WINDOWEVENT_RESIZED:
+                            width = event.window.data1;
+                            height = event.window.data2;
+                            SDL_DestroyTexture(texture);
+                            texture = SDL_CreateTexture(renderer,
+                                    SDL_PIXELFORMAT_ARGB8888,
+                                    SDL_TEXTUREACCESS_STREAMING,
+                                    width, height);
+                            break;
+                    }
             }
         }
         void *pixels = NULL;
