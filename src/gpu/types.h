@@ -9,37 +9,41 @@
 
 typedef struct {
     float x, y, z;
-} pos_t;
+} gpu_pos;
 
 typedef struct {
     uint8_t r, g, b, a;
-} color_t;
+} gpu_color;
 
 typedef struct {
     float s, t, r, q;
-} tex_coord_t;
+} gpu_tex_coord;
+
+typedef struct {
+    gpu_pos pos;
+    gpu_color color;
+    gpu_tex_coord tex;
+} gpu_vert;
 
 typedef struct {
     uint32_t len;
-    pos_t *pos;
-    color_t *color;
-    tex_coord_t *tex;
-} vertex_t;
+    gpu_vert *v;
+} gpu_verts;
 
 typedef struct {
     uint32_t width, height;
-    color_t data[];
-} tex_t;
+    gpu_color data[];
+} gpu_tex;
 
 typedef struct {
-    color_t *buf;
     uint32_t width, height;
     tack_t queue;
+    gpu_color *buf;
 } gpu_frame;
 
 typedef struct {
     uint32_t primitive;
-    vertex_t *verts;
+    gpu_verts *verts;
     bool wireframe;
 } gpu_cmd;
 

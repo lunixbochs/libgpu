@@ -23,27 +23,27 @@
 
 #define SWAP(a, b) do { tmp = (a); (a) = (b); (b) = (tmp); } while (0);
 
-color_t white = {0xFF, 0xFF, 0xFF, 0xFF};
+gpu_color white = {0xFF, 0xFF, 0xFF, 0xFF};
 
-bool is_backward(vertex_t *tri, int index) {
-    pos_t *a = &tri->pos[index+0];
-    pos_t *b = &tri->pos[index+1];
-    pos_t *c = &tri->pos[index+2];
+bool is_backward(gpu_verts *v, int index) {
+    gpu_pos *a = &v->v[index+0].pos;
+    gpu_pos *b = &v->v[index+1].pos;
+    gpu_pos *c = &v->v[index+2].pos;
     return ((b->x - a->x) * (c->y - a->y) - (b->y - a->y) * (c->x - a->x)) <= 0;
 }
 
-static inline color_t *gpu_pixel_at(gpu_frame *frame, int x, int y) {
+static inline gpu_color *gpu_pixel_at(gpu_frame *frame, int x, int y) {
     if (x < 0 || x >= frame->width || y < 0 || y >= frame->height) return NULL;
     return &(frame->buf[x + y * frame->width]);
 }
 
 void gpu_pixel(gpu_frame *frame, int x, int y) {
-    color_t *pixel = gpu_pixel_at(frame, x, y);
+    gpu_color *pixel = gpu_pixel_at(frame, x, y);
     if (pixel == NULL) return;
     *pixel = white;
 }
 
-void gpu_line(gpu_frame *frame, pos_t *a, pos_t *b) {
+void gpu_line(gpu_frame *frame, gpu_pos *a, gpu_pos *b) {
     float x1, y1, x2, y2;
     float tmp;
     x1 = a->x, y1 = a->y;
@@ -70,9 +70,9 @@ void gpu_line(gpu_frame *frame, pos_t *a, pos_t *b) {
     }
 }
 
-void gpu_triangle_fill(gpu_frame *frame, vertex_t *v, int index) {
-    pos_t *v1 = &v->pos[index+0], *v2 = &v->pos[index+1], *v3 = &v->pos[index+2];
-    pos_t *tmp;
+void gpu_triangle_fill(gpu_frame *frame, gpu_verts *v, int index) {
+    gpu_pos *v1 = &v->v[index+0].pos, *v2 = &v->v[index+1].pos, *v3 = &v->v[index+2].pos;
+    gpu_pos *tmp;
     // sort vertices
     if (v2->y < v1->y) {
         SWAP(v2, v1);
@@ -83,8 +83,8 @@ void gpu_triangle_fill(gpu_frame *frame, vertex_t *v, int index) {
     } else if (v3->y < v2->y) {
         SWAP(v3, v2);
     }
-    pos_t *top = v3, *lmid = v2, *bot = v1;
-    pos_t *rmid, rmidb;
+    gpu_pos *top = v3, *lmid = v2, *bot = v1;
+    gpu_pos *rmid, rmidb;
     if (top->y == lmid->y) {
         rmid = top;
     } else {
@@ -94,7 +94,7 @@ void gpu_triangle_fill(gpu_frame *frame, vertex_t *v, int index) {
             lmid->y,
             0, // tbd
         };
-        memcpy(&rmidb, tmid, sizeof(pos_t));
+        memcpy(&rmidb, tmid, sizeof(gpu_pos));
         rmid = &rmidb;
     }
     if (rmid->x < lmid->x) {
@@ -118,7 +118,7 @@ void gpu_triangle_fill(gpu_frame *frame, vertex_t *v, int index) {
         for (int y = lmid->y; y < top->y; y += 1) {
             float tlx = MAX(0, MIN(lx, frame->width));
             float trx = MAX(0, MIN(rx, frame->width));
-            color_t *pixel = gpu_pixel_at(frame, tlx, y);
+            gpu_color *pixel = gpu_pixel_at(frame, tlx, y);
             for (int x = tlx; x < trx; x++) {
                 *pixel++ = white;
             }
@@ -143,7 +143,7 @@ void gpu_triangle_fill(gpu_frame *frame, vertex_t *v, int index) {
         for (int y = bot->y; y < lmid->y; y += 1) {
             float tlx = MAX(0, MIN(lx, frame->width));
             float trx = MAX(0, MIN(rx, frame->width));
-            color_t *pixel = gpu_pixel_at(frame, tlx, y);
+            gpu_color *pixel = gpu_pixel_at(frame, tlx, y);
             for (int x = tlx; x < trx; x++) {
                 *pixel++ = white;
             }
@@ -153,14 +153,14 @@ void gpu_triangle_fill(gpu_frame *frame, vertex_t *v, int index) {
     }
 }
 
-void gpu_triangle(gpu_frame *frame, vertex_t *verts, int index, bool wire) {
+void gpu_triangle(gpu_frame *frame, gpu_verts *verts, int index, bool wire) {
     if (is_backward(verts, index)) {
         return;
     }
     if (wire) {
         for (int i = index; i < index + 3; i++) {
             int next = index + (i + 1) % 3;
-            gpu_line(frame, &verts->pos[i], &verts->pos[next]);
+            gpu_line(frame, &verts->v[i].pos, &verts->v[next].pos);
         }
     } else {
         gpu_triangle_fill(frame, verts, index);

@@ -16,10 +16,10 @@ gpu_frame gpu_frame_init(void *buf, uint32_t width, uint32_t height) {
     };
 }
 
-void gpu_frame_clear(gpu_frame *frame, color_t color) {
+void gpu_frame_clear(gpu_frame *frame, gpu_color color) {
     for (int y = 0; y < frame->height; y++) {
         for (int x = 0; x < frame->width; x++) {
-            color_t *pixel = &frame->buf[y * frame->width + x];
+            gpu_color *pixel = &frame->buf[y * frame->width + x];
             *pixel = color;
         }
     }

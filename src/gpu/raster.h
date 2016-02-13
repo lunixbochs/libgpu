@@ -4,6 +4,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-extern void gpu_triangle(gpu_frame *frame, vertex_t *verts, int index, bool fill);
+extern void gpu_triangle(gpu_frame *frame, gpu_verts *verts, int index, bool fill);
 
 #endif

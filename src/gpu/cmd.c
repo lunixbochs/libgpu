@@ -3,9 +3,9 @@
 #include "cmd.h"
 #include "enum.h"
 #include "raster.h"
-#include "vertex.h"
+#include "verts.h"
 
-gpu_cmd *gpu_cmd_new(uint32_t primitive, vertex_t *verts, bool wireframe) {
+gpu_cmd *gpu_cmd_new(uint32_t primitive, gpu_verts *verts, bool wireframe) {
     gpu_cmd *cmd = malloc(sizeof(gpu_cmd));
     cmd->primitive = primitive;
     cmd->verts = verts;
@@ -14,7 +14,7 @@ gpu_cmd *gpu_cmd_new(uint32_t primitive, vertex_t *verts, bool wireframe) {
 }
 
 void gpu_cmd_free(gpu_cmd *cmd) {
-    vertex_free(cmd->verts);
+    free(cmd->verts);
     free(cmd);
 }
 

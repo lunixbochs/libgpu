@@ -7,7 +7,7 @@
 #include "gpu/frame.h"
 #include "gpu/mm.h"
 #include "gpu/raster.h"
-#include "gpu/vertex.h"
+#include "gpu/verts.h"
 #include "util/matrix.h"
 
 void draw_frame(uint8_t *frame_out, int width, int height, int counter) {
@@ -35,32 +35,33 @@ void draw_frame(uint8_t *frame_out, int width, int height, int counter) {
     */
 
     gpu_frame frame = gpu_frame_init(frame_out, width, height);
-    color_t clear_color = {0x00, 0x00, 0x00, 0xFF};
+    gpu_color clear_color = {0x00, 0x00, 0x00, 0xFF};
     gpu_frame_clear(&frame, clear_color);
 
     #include "shapes.h"
 
-    vertex_t *v1 = vertex_new();
-    v1->len = 36;
-    v1->pos = memdup(cube3d, 36 * sizeof(pos_t));
-    vertex_t *v2 = vertex_copy(v1);
+    gpu_verts *v1 = gpu_verts_new(36);
+    for (int i = 0; i < 36; i++) {
+        v1->v[i].pos = ((gpu_pos *)cube3d)[i];
+    }
+    gpu_verts *v2 = gpu_verts_copy(v1);
     /*
-    vertex_transform(model, v1, v1);
-    vertex_transform(model2, v2, v2);
+    gpu_verts_transform(model, v1, v1);
+    gpu_verts_transform(model2, v2, v2);
     */
-    vertex_transform(&model, v1, v1);
-    vertex_transform(&view, v1, v1);
-    vertex_transform(&viewport, v1, v1);
-    vertex_transform(&model2, v2, v2);
-    vertex_transform(&view, v2, v2);
-    vertex_transform(&viewport, v2, v2);
+    gpu_verts_transform(&model, v1, v1);
+    gpu_verts_transform(&view, v1, v1);
+    gpu_verts_transform(&viewport, v1, v1);
+    gpu_verts_transform(&model2, v2, v2);
+    gpu_verts_transform(&view, v2, v2);
+    gpu_verts_transform(&viewport, v2, v2);
 
     gpu_cmd *cmd1 = gpu_cmd_new(GPU_TRIANGLE, v1, false);
     gpu_cmd *cmd2 = gpu_cmd_new(GPU_TRIANGLE, v2, true);
     gpu_cmd_draw(cmd1, &frame);
     gpu_cmd_draw(cmd2, &frame);
-    free(cmd1);
-    free(cmd2);
+    gpu_cmd_free(cmd1);
+    gpu_cmd_free(cmd2);
 }
 
 int main() {
